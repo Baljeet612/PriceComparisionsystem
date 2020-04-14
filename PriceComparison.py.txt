@@ -1,0 +1,43 @@
+import  requests
+import  json
+import  csv
+import  matplotlib.pyplot  as  plt
+import  pandas
+from  bs4  import  BeautifulSoup
+URLlist  = [‘https://www.priceme.com.my/Samsung-Galaxy-S10-SM-G973F-8GB-128GB/p-903473115.aspx’, ‘https://www.priceme.com.my/iPhone-11-Pro-64GB/p-904566323.aspx’, ‘https://www.priceme.com.my/Huawei-P30-Pro-256GB/p-903485037.aspx’]
+#get the total number of URL 
+lenURL = len(URLlist)
+#create an array with size of total number of URL to store the title 
+Title = [‘’]*lenURL
+#open exel file with writing mode
+file_result = open(‘Price Comparison.csv’, ‘w’ , encoding= ‘UTF-8’ )
+# get data in targeted website (title ,store ,price)
+for i in range (lenURL):
+resp= requests.get(URLlist[i])
+soup = BeautifulSoup(resp.content, ‘lxml’)
+table_title = soup.find(‘div’,{‘class’ : ‘pHead’})
+title = table _title.find(‘h1’).text.strip()
+table_info = soup.find(‘div’,{‘class’ : ‘rpContent’})
+#title store  here for future purpose 
+Print(title)
+titles[i] = title
+For data in table_info.findA11(‘div’,{‘class’ : ‘pricesDiv’}):
+price = data.find(‘span’,{‘class’ : ‘priceSpan’}).text.strip()
+store =data.find(‘amp-img’, {‘width’ : ‘90’})
+file_result.write(title + ‘,’ + store[“alt”] + ‘,’ + price.replace (‘,’  ‘’) +  ‘\n’)
+file_result.close()
+#plot   bar graph
+column = [‘title’, ‘store’, ‘price’]
+dataset = pandas.read_csv(‘Price Comparison.csv’,names=column) 
+length = len(dataset.title.unique())
+color=iter([‘orange’ , ‘blue’ , ‘purple’])
+for i in range (length):
+arr = dataset.loc[dataset.title == dataset.title.unique()[i]]
+print (‘Item title :’  +  arr.title.unique())
+print(‘Lowest  price :’ + str(min(arr.price)) +  ‘at :’ + arr.loc[arr.price==arr.price.min()].store.values)
+print()
+plt.figure(figsize=(12,5))
+plt.barh(arr.store,  arr.price,  color =  next(colors))
+plt.xlim(xmin = arr.price.min()-arr.price.min()%1000-1000)
+plt.suptitle(dataset.title.unique()[i])
+plt.show()
